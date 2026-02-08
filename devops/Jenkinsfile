@@ -14,8 +14,8 @@ pipeline {
     stage('Info') {
       steps {
         // Imprime JOB_NAME y BUILD_NUMBER
-        echo "Job: ${env.JOB_NAME}"
-        echo "Build: ${env.BUILD_NUMBER}"
+        sh 'echo "Job: ${env.JOB_NAME}"'
+        sh 'echo "Build: ${env.BUILD_NUMBER}"'
       }
     }
     
