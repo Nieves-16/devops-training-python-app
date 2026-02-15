@@ -18,6 +18,24 @@ pipeline {
         echo "Build: ${env.BUILD_NUMBER}"
       }
     }
+
+    // ==========================
+    // Practica 2 - Ejercicio 2
+    // ==========================
+    stage('Test') {
+      // Contenedor Python
+      agent {
+        docker { 
+          image 'python:3.6-slim' 
+        }
+      }
+      steps {
+        // Ejecuta pytest
+        sh 'pip install pytest'
+        sh 'pytest' 
+      }
+    }
+
     
   }
 }
