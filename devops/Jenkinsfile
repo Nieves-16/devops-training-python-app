@@ -15,6 +15,11 @@ pipeline {
   // `agent any` = el pipeline se ejecuta en cualquier nodo/agente disponible.
   agent any
 
+  environment {
+    // IMAGE_NAME (tag para docker build)
+	  IMAGE_NAME = "myapp:${env.GIT_COMMIT}"
+  }
+
   stages {
 
     // ==========================
@@ -74,6 +79,7 @@ pipeline {
     steps {
       script {
         // Construye la imagen Docker usando el Dockerfile del repo
+        // IMAGE_NAME -> Se define en las variables
         docker.build(env.IMAGE_NAME, "-f devops/Dockerfile .")
       }
     }
