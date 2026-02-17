@@ -66,6 +66,18 @@ pipeline {
 		  }
 	  }
   }
+
+  // =========================
+  // Practica 2 - Ejercicio 5
+  // =========================
+  stage('Build image') {
+    steps {
+      script {
+        // Construye la imagen Docker usando el Dockerfile del repo
+        docker.build(env.IMAGE_NAME, "-f devops/Dockerfile .")
+      }
+    }
+  }
   
   }
 }
