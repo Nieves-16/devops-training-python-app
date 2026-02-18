@@ -85,10 +85,17 @@ pipeline {
     }
   }
 
-  // =========================
-  // Practica 2 - Ejercicio 6 
-  // =========================
+  // ===============================
+  // Practica 2 - Ejercicio 6 - 6.1
+  // ===============================
 	stage('CD') {
+    when {
+      anyOf {
+	      expression { return env.RUN_CD == 'true' }
+        branch 'develop'
+        branch 'master'
+      }
+    }
 	  steps {
       script {
         sh 'docker compose up -d'
