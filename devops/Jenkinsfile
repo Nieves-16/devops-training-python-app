@@ -84,6 +84,24 @@ pipeline {
       }
     }
   }
+
+  // =========================
+  // Practica 2 - Ejercicio 6 
+  // =========================
+	stage('CD') {
+	  steps {
+      script {
+        sh 'docker compose up -d'
+        sh 'sleep 5'
+        sh 'docker compose logs app'
+      }
+    }
+	  post {
+      always {
+        sh 'docker compose down --volumes'
+      }
+    }
+	}
   
   }
 }
