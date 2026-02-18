@@ -80,6 +80,7 @@ pipeline {
       script {
         // Construye la imagen Docker usando el Dockerfile del repo
         // IMAGE_NAME -> Se define en las variables
+        echo "Tag imagen: ${env.IMAGE_TAG}"
         docker.build(env.IMAGE_NAME, "-f devops/Dockerfile .")
       }
     }
