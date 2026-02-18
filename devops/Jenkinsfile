@@ -89,6 +89,8 @@ pipeline {
   // Practica 2 - Ejercicio 6 - 6.1
   // ===============================
 	stage('CD') {
+    // Establece condiciones para que se ejecute el stage
+    // Se ejecutara si la variable es true, o si es una rama develop o master
     when {
       anyOf {
 	      expression { return env.RUN_CD == 'true' }
@@ -98,6 +100,16 @@ pipeline {
     }
 	  steps {
       script {
+
+        // Determinar entorno según la rama
+        env.DEPLOY_ENV = (env.BRANCH_NAME == 'master') ? 'PRO' : 'DEV'
+
+        // Mostrar mensaje en logs
+        echo "Deploying to ${env.DEPLOY_ENV}"
+
+        // Levanta el contenedor definido en docker-compose.yml
+        // Espera 5 segundos
+        // Muestra los logs
         sh 'docker compose up -d'
         sh 'sleep 5'
         sh 'docker compose logs app'
@@ -105,6 +117,7 @@ pipeline {
     }
 	  post {
       always {
+        // Elimina contenedor
         sh 'docker compose down --volumes'
       }
     }
