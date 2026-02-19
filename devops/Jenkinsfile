@@ -25,6 +25,7 @@ pipeline {
   environment {
     // IMAGE_NAME (tag para docker build)
 	  IMAGE_NAME = "myapp:${env.GIT_COMMIT}"
+    APP_URL = "http://localhost:5001/"
   }
 
   stages {
@@ -37,6 +38,8 @@ pipeline {
         // Imprime JOB_NAME y BUILD_NUMBER
         echo "Job: ${env.JOB_NAME}"
         echo "Build: ${env.BUILD_NUMBER}"
+        echo "Imagen: ${env.IMAGE_NAME}"
+        sh "echo URL=${APP_URL}"
       }
     }
 
