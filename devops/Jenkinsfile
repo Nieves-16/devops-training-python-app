@@ -133,11 +133,9 @@ pipeline {
     }
 	  post {
       always {
-        // Elimina contenedor //elimina la imagen (Se ponen entre comillas dobles para que iterpole las variables)
+        // Elimina contenedor y elimina la imagen
         sh 'docker compose down --volumes'
-        // Elimina la imagen (Entre comillas dobles para que iterpole la variable, en caso contrario da error,
-        // pero no fallaría el pipeline por la condición true)
-        sh "docker rmi IMAGE_NAME || true"
+        sh 'docker rmi $IMAGE_NAME || true'
       }
       success {
         // Imprime SUCCESS
