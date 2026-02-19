@@ -22,6 +22,9 @@ pipeline {
     booleanParam(name: 'RUN_CD', defaultValue: false, description: 'Ejecutar CD')
   }
 
+  // ==========================
+  // Practica 2 - Ejercicio 6.4
+  // ==========================
   environment {
     // IMAGE_NAME (tag para docker build)
 	  IMAGE_NAME = "myapp:${env.GIT_COMMIT}"
@@ -95,9 +98,9 @@ pipeline {
     }
   }
 
-  // ===========================================
-  // Practica 2 - Ejercicio 6 - 6.1 - 6.2 - 3.3
-  // ===========================================
+  // =================================================
+  // Practica 2 - Ejercicio 6 - 6.1 - 6.2 - 6.3 - 6.5
+  // =================================================
 	stage('CD') {
     // Establece condiciones para que se ejecute el stage
     // Se ejecutara si la variable es true, o si es una rama develop o master
@@ -132,6 +135,15 @@ pipeline {
       always {
         // Elimina contenedor
         sh 'docker compose down --volumes'
+      }
+      success {
+        // Imprime SUCCESS
+        echo 'SUCCESS'
+      }
+      failure {
+        // Imprime FAILURE y muestra logs
+        echo 'FAILURE'
+        sh 'docker compose logs || true'
       }
     }
 	}
