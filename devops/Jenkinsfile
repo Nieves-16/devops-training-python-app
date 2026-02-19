@@ -133,8 +133,9 @@ pipeline {
     }
 	  post {
       always {
-        // Elimina contenedor
+        // Elimina contenedor y elimina la imagen
         sh 'docker compose down --volumes'
+        sh 'docker rmi IMAGE_NAME || true'
       }
       success {
         // Imprime SUCCESS
