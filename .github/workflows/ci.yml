@@ -98,16 +98,16 @@ jobs:
       - name: Build image
         run: docker build -t $IMAGE_NAME -f devops/Dockerfile .
 
-    # Job CD
-    cd:
-      needs: ci
-      if: ${{ github.event_name == 'workflow_dispatch' && inputs.RUN_CD == true || github.ref_name == 'develop' || github.ref_name == 'master' }}
-      environment: ${{ github.ref_name == 'master' && 'PRO' || 'DEV' }
-      runs-on: ubuntu-latest
+  # Job CD
+  cd:
+    needs: ci
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.RUN_CD == true || github.ref_name == 'develop' || github.ref_name == 'master' }}
+    environment: ${{ github.ref_name == 'master' && 'PRO' || 'DEV' }
+    runs-on: ubuntu-latest
 
-      # Pasos
-      steps:
-        - uses: actions/checkout@v4
-        - name: CD
-          run: |
-              echo "CD habilitado: RUN_CD=${{ github.event.inputs.RUN_CD }}, branch=${GITHUB_REF_NAME}"
+    # Pasos
+    steps:
+      - uses: actions/checkout@v4
+      - name: CD
+        run: |
+            echo "CD habilitado: RUN_CD=${{ github.event.inputs.RUN_CD }}, branch=${GITHUB_REF_NAME}"
