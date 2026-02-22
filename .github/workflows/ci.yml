@@ -1,8 +1,14 @@
 name: "CI/CD"
 
+# Practica 3 - Ejercicio 3
+# Variables de entorno a nivel de workflow
+env:
+  IMAGE_NAME: my-app
+  APP_URL: myapp
+
+# Practica 3 - Ejercicio 1
 # Eventos que disparan el workflow
 on:
-  # Practica 3 - Ejercicio 1
   # Se ejecuta en todas las ramas
   push:
     branches: ['**']
@@ -26,6 +32,11 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    # Practica 3 - Ejercicio 3
+    env:
+      APP_URL: myappurl
+
+    # Practica 3 - Ejercicio 2
     # Pasos
     steps:
 
@@ -40,3 +51,9 @@ jobs:
           echo "Commit SHA: ${{ github.sha }}"
           echo "Runner OS: ${{ runner.os }}"
           echo "Runner Name: ${{ runner.name }}"
+
+      # Imprimir variables
+      - name: Variables
+        run: |
+          echo "IMAGE_NAME: $IMAGE_NAME"
+          echo "APP_URL: ${{ env.APP_URL }}"
