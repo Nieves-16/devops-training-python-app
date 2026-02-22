@@ -35,11 +35,12 @@ on:
           - DEV
           - PRO
 
-# Practica 3 - Ejercicio 2 - 3 - 4
+# Practica 3 - Ejercicio 2 - 3 - 4 - 5
 # Definicion de jobs
 jobs:
   # Job CI
   ci:
+    environment: ${{ github.ref_name == 'master' && 'PRO' || 'DEV' }}
     runs-on: ubuntu-latest
 
     env:
@@ -65,6 +66,7 @@ jobs:
         run: |
           echo "IMAGE_NAME: $IMAGE_NAME"
           echo "APP_URL: ${{ env.APP_URL }}"
+          echo "REGISTRY_HOST: ${{ vars.REGISTRY_HOST }}"
 
       # Imprimir parámetros
       - name: Imprimir parámetros

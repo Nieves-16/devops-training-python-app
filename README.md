@@ -42,3 +42,12 @@ docker logs app1
 docker-compose up -d
 curl localhost:5001
 ```
+
+
+## Definición de variables y secretos (Práctica 2 - Ejercicio 5)
+Se crean dos environments (DEV y PRO). En cada environment, se definen variables y secretos.
+- Variables:
+```REGISTRY_HOST``` con valor ```ghcr.io```
+- Secretos:
+```REGISTRY_USER```
+```REGISTRY_PASSWORD``` con token 
