@@ -1,6 +1,6 @@
 name: "CI/CD"
 
-# Practica 3 - Ejercicio 3
+# Practica 3 - Ejercicio 3 - 7
 # Variables de entorno a nivel de workflow
 env:
   IMAGE_NAME: my-app
@@ -36,7 +36,7 @@ on:
           - DEV
           - PRO
 
-# Practica 3 - Ejercicio 2 - 3 - 4 - 5 - 6
+# Practica 3 - Ejercicio 2 - 3 - 4 - 5 - 6 - 7 - 8
 # Definicion de jobs
 jobs:
   # Job CI
@@ -97,3 +97,17 @@ jobs:
       # Build image
       - name: Build image
         run: docker build -t $IMAGE_NAME -f devops/Dockerfile .
+
+    # Job CD
+    cd:
+      needs: ci
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.RUN_CD == true || github.ref_name == 'develop' || github.ref_name == 'master' }}
+      environment: ${{ github.ref_name == 'master' && 'PRO' || 'DEV' }
+      runs-on: ubuntu-latest
+
+      # Pasos
+      steps:
+        - uses: actions/checkout@v4
+        - name: CD
+          run: |
+              echo "CD habilitado: RUN_CD=${{ github.event.inputs.RUN_CD }}, branch=${GITHUB_REF_NAME}"
