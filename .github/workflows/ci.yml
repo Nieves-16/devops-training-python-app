@@ -5,6 +5,7 @@ name: "CI/CD"
 env:
   IMAGE_NAME: my-app
   APP_URL: myapp
+  IMAGE_REPO: Nieves-16/devops-training-python-app
 
 # Practica 3 - Ejercicio 1 - 4
 # Eventos que disparan el workflow
@@ -64,7 +65,7 @@ jobs:
       # Imprimir variables
       - name: Variables
         run: |
-          echo "IMAGE_NAME: $IMAGE_NAME"
+          echo "IMAGE_NAME=${IMAGE_REPO}:$(cat VERSION)" >> $GITHUB_ENV
           echo "APP_URL: ${{ env.APP_URL }}"
           echo "REGISTRY_HOST: ${{ vars.REGISTRY_HOST }}"
 
@@ -92,3 +93,7 @@ jobs:
             pip install -r requirements.txt flake8 mypy pytest && \
             pytest -q && \
             make test"
+
+      # Build image
+      - name: Build image
+        run: docker build -t $IMAGE_NAME -f devops/Dockerfile .
