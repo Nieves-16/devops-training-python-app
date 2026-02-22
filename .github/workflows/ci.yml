@@ -1,12 +1,13 @@
 name: "CI/CD"
 
+# Eventos que disparan el workflow
 on:
   # Practica 3 - Ejercicio 1
   # Se ejecuta en todas las ramas
   push:
     branches: ['**']
 
-  # Se ejecuta al al crear PR con destino develop y master
+  # Se ejecuta al crear PR con destino develop y master
   pull_request:
     branches: [develop, master]
 
@@ -19,9 +20,23 @@ on:
         default: false
         type: boolean
 
+# Definicion de jobs
 jobs:
-  info:
+  # Job CI
+  ci:
     runs-on: ubuntu-latest
+
+    # Pasos
     steps:
-      - name: Dummy
-        run: echo "workflow dummy ok"
+
+      # Clona el repositorio en el runner
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Imprimir información del entorno
+      - name: Info
+        run: |
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Runner OS: ${{ runner.os }}"
+          echo "Runner Name: ${{ runner.name }}"
