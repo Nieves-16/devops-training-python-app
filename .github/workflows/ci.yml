@@ -1,7 +1,23 @@
-name: "Workflow Dummy"
+name: "CI/CD"
 
 on:
+  # Practica 3 - Ejercicio 1
+  # Se ejecuta en todas las ramas
   push:
+    branches: ['**']
+
+  # Se ejecuta al al crear PR con destino develop y master
+  pull_request:
+    branches: [develop, master]
+
+  # Permite ejecutar el workflow manualmente con un input booleano RUN_CD (default false)
+  workflow_dispatch:
+    inputs:
+      RUN_CD:
+        description: "Run CD stage"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   info:
