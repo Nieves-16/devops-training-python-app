@@ -76,20 +76,19 @@ jobs:
 
       # Build CI image
       - name: Build CI image
-        run: docker build -t python-imagen-ci -f devops/ci.Dockerfile . 
+        run: docker build -t python-imagen-ci -f devops/ci.Dockerfile .
 	
       # Lint
       - name: Lint
         run: |
-          docker run --rm -v "${GITHUB_WORKSPACE}:/app" -w /app python-imagen-ci bash -c "
-            pip install -r requirements.txt flake8 mypy &&
-            make lint
-          "
+          docker run --rm -v "${GITHUB_WORKSPACE}:/app" -w /app python-imagen-ci bash -c "\
+            pip install -r requirements.txt flake8 mypy && \
+            make lint"
+      
       # Test
       - name: Test
         run: |
-          docker run --rm -v "${GITHUB_WORKSPACE}:/app" -w /app python-imagen-ci bash -c "
-            pip install -r requirements.txt flake8 mypy pytest &&
-            pytest -q &&
-            make test
-          "
+          docker run --rm -v "${GITHUB_WORKSPACE}:/app" -w /app python-imagen-ci bash -c "\
+            pip install -r requirements.txt flake8 mypy pytest && \
+            pytest -q && \
+            make test"
