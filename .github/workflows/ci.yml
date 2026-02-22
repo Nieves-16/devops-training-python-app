@@ -6,7 +6,7 @@ env:
   IMAGE_NAME: my-app
   APP_URL: myapp
 
-# Practica 3 - Ejercicio 1
+# Practica 3 - Ejercicio 1 - 4
 # Eventos que disparan el workflow
 on:
   # Se ejecuta en todas las ramas
@@ -26,17 +26,25 @@ on:
         default: false
         type: boolean
 
+      # Ejecucion manual con parametros
+      DEPLOY_ENV:
+        description: "Run environment"
+        required: false
+        type: choice
+        options:
+          - DEV
+          - PRO
+
+# Practica 3 - Ejercicio 2 - 3 - 4
 # Definicion de jobs
 jobs:
   # Job CI
   ci:
     runs-on: ubuntu-latest
 
-    # Practica 3 - Ejercicio 3
     env:
       APP_URL: myappurl
 
-    # Practica 3 - Ejercicio 2
     # Pasos
     steps:
 
@@ -57,3 +65,9 @@ jobs:
         run: |
           echo "IMAGE_NAME: $IMAGE_NAME"
           echo "APP_URL: ${{ env.APP_URL }}"
+
+      # Imprimir parámetros
+      - name: Imprimir parámetros
+        run: |
+          echo "RUN_CD value: ${{ inputs.RUN_CD }}"
+          echo "DEPLOY_ENV value: ${{ inputs.DEPLOY_ENV }}"
