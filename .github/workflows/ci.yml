@@ -35,7 +35,7 @@ on:
           - DEV
           - PRO
 
-# Practica 3 - Ejercicio 2 - 3 - 4 - 5
+# Practica 3 - Ejercicio 2 - 3 - 4 - 5 - 6
 # Definicion de jobs
 jobs:
   # Job CI
@@ -73,3 +73,24 @@ jobs:
         run: |
           echo "RUN_CD value: ${{ inputs.RUN_CD }}"
           echo "DEPLOY_ENV value: ${{ inputs.DEPLOY_ENV }}"
+
+      # Build CI image
+      - name: Build CI image
+        run: |
+          docker build -t python-imagen-ci -f devops/ci.Dockerfile . 
+	
+      # Lint
+      - name: Lint
+        run: |
+          docker run --rm -v "${GITHUB_WORKSPACE}:/app" -w /app python-imagen-ci bash -c "
+            pip install -r requirements.txt flake8 mypy &&
+            make lint
+          "
+      # Test
+      - name: Test
+        run: |
+          docker run --rm -v "${GITHUB_WORKSPACE}:/app" -w /app python-imagen-ci bash -c "
+            pip install -r requirements.txt flake8 mypy pytest &&
+            pytest -q &&
+            make test
+          "
