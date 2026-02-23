@@ -111,6 +111,7 @@ jobs:
       - name: CD
         run: |
             echo "CD habilitado: RUN_CD=${{ github.event.inputs.RUN_CD }}, branch=${GITHUB_REF_NAME}"
+            echo "IMAGE_NAME es $IMAGE_NAME"
 
       # Despliegue
       - name: Despliegue - espera - logs
