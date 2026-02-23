@@ -115,7 +115,7 @@ jobs:
       # Despliegue
       - name: Despliegue - espera - logs
         run: |
-          docker compose up -d
+          docker compose up -d app
           sleep 5
           docker compose logs app
 
