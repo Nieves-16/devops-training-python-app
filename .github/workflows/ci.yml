@@ -74,6 +74,7 @@ jobs:
         run: |
           echo "RUN_CD value: ${{ inputs.RUN_CD }}"
           echo "DEPLOY_ENV value: ${{ inputs.DEPLOY_ENV }}"
+          echo "IMAGE_NAME es $IMAGE_NAME"
 
       # Build CI image
       - name: Build CI image
