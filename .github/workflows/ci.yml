@@ -113,18 +113,29 @@ jobs:
         run: |
             echo "CD habilitado: RUN_CD=${{ github.event.inputs.RUN_CD }}, branch=${GITHUB_REF_NAME}"
             echo "IMAGE_NAME=${IMAGE_REPO}:$(cat VERSION)" >> $GITHUB_ENV
+            echo "IMAGE_VERSION=$(cat VERSION)" >> $GITHUB_ENV
             echo "IMAGE_NAME es $IMAGE_NAME"
+            if [ "${GITHUB_REF_NAME}" = "master" ]; then DEPLOY_ENV=PRO; else DEPLOY_ENV=DEV; fi
+            echo "DEPLOY_ENV=${DEPLOY_ENV}" >> $GITHUB_ENV
+            echo "COMPOSE_PROJECT=$(echo ${DEPLOY_ENV} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      # Build app image (para que la imagen exista en este job)
+      - name: Build app image
+        run: |
+          docker build -t "${IMAGE_NAME}" --build-arg VERSION="${VERSION_JAR}" -f devops/Dockerfile .
+          echo "Build app image"
 
       # Despliegue
       - name: Despliegue - espera - logs
         run: |
-          docker compose up -d app
+          docker compose -p "${COMPOSE_PROJECT}" up -d
           sleep 5
-          docker compose logs app
+          docker compose -p "${COMPOSE_PROJECT}" logs java_app
 
       # Limpieza (aunque falle)
       - name: Cleanup
         if: always()
         run: |
-          docker compose down --volumes
+          docker compose -p "${COMPOSE_PROJECT}" down --volumes
           docker rmi $IMAGE_NAME || true
+
