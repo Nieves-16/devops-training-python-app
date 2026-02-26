@@ -1,0 +1,87 @@
+##
+## Práctica 4 - GitLab CI/CD
+##
+
+stages:
+  - ci
+  - cd
+
+variables:
+  # Variables globales
+  IMAGE_REPO: "Nieves-16/devops-training-python-app"
+  REGISTRY_HOST: "local-registry:5000"
+  REGISTRY_REPO: "Nieves-16/devops-training-python-app"
+  COMPOSE_FILE: "docker-compose.yml"
+  COMPOSE_SERVICE: "app"
+  ENABLE_REGISTRY_PUSH: "true"
+  RUN_CD: "true"
+
+# Job CI
+ci:build:
+  stage: ci
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  script:
+  - IMAGE_NAME="$IMAGE_REPO:$(cat VERSION)"
+  
+  # Build CI image
+  - docker build -t python-imagen-ci -f devops/ci.Dockerfile .
+
+  # Lint
+  - |
+    docker run --rm -v "$CI_PROJECT_DIR:/app" -w /app python-imagen-ci \
+      bash -c "pip install -r requirements.txt flake8 mypy && \
+      make lint"
+
+  # Test
+  - |
+    docker run --rm -v "$CI_PROJECT_DIR:/app" -w /app python-imagen-ci bash -c "\
+      pip install -r requirements.txt flake8 mypy pytest && \
+      pytest -q && \
+      make test"
+
+  # Build CI image
+  - |
+    docker build -t "$IMAGE_NAME" -f devops/Dockerfile .
+
+cd:deploy:
+  stage: cd
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  rules:
+    # Ejecutar si RUN_CD == "true" o rama develop/master
+    - if: '$RUN_CD == "true"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - when: never
+  # Environment dinamico (master=PRO, resto=DEV)
+  before_script:
+  - |
+    if [ "$CI_COMMIT_BRANCH" = "master" ]; then
+      export ENV_NAME=PRO
+    else
+      export ENV_NAME=DEV
+    fi
+  environment:
+    name: $ENV_NAME
+  script:
+    # En runner GitLab shared no hay registry local, se simula con build local.
+    # Despliegue - espera - logs
+    - IMAGE_NAME="$IMAGE_REPO:$(cat VERSION)"
+    - docker build -t $IMAGE_NAME -f devops/Dockerfile .
+    - docker compose up -d
+    - sleep 5
+    - docker compose logs $COMPOSE_SERVICE
+  after_script:
+    # Limpieza (aunque falle)
+    - docker compose down --volumes || true
+    - docker rmi $IMAGE_NAME || true
