@@ -1,0 +1,101 @@
+# 
+# Práctica 5 - Azure DevOps Pipelines
+#
+
+trigger:
+  # Se ejecuta en todas las ramas
+  branches:
+    include: ['*']
+
+pr:
+  # Se ejecuta al crear PR con destino develop y master
+  branches:
+    include: [develop, master]
+
+parameters:
+  # Permite la ejecución manual con un input booleano RUN_CD (default false)
+  - name: RUN_CD
+    type: boolean
+    default: false
+
+variables:
+  # Variable Group (centraliza variables compartidas)
+  - group: devops-python-shared
+  # Variables específicas del pipeline
+  - name: IMAGE_REPO
+    value: "Nieves-16/devops-training-python-app"
+  - name: COMPOSE_FILE
+    value: "docker-compose.yml"
+  - name: COMPOSE_SERVICE
+    value: "app"
+
+stages:
+  - stage: CI
+    displayName: "CI"
+    jobs:
+      - job: ci_build
+        displayName: "Lint, test y build imagen"
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          # Clona el repositorio
+          - checkout: self
+          - script: |
+              IMAGE_VERSION=$(cat VERSION)
+              IMAGE_NAME="$(IMAGE_REPO):${IMAGE_VERSION}"
+              CI_IMAGE="python-imagen-ci:$(Build.BuildId)"
+              echo "Build CI image"
+              docker build -t ${CI_IMAGE} -f devops/ci.Dockerfile .
+              echo "Lint"
+              docker run --rm -v "$(Build.SourcesDirectory):/app" -w /app ${CI_IMAGE} bash -c "\
+                pip install -r requirements.txt flake8 mypy && make lint"
+              echo "Test"
+              docker run --rm -v "${Build.SourcesDirectory}:/app" -w /app ${CI_IMAGE} bash -c "\
+                pip install -r requirements.txt flake8 mypy pytest && pytest -q && make test"
+              echo "Build image"
+              docker build -t ${IMAGE_NAME} -f devops/Dockerfile .
+            displayName: "CI steps"
+
+  - stage: CD
+    displayName: "CD"
+    dependsOn: CI
+    # Ejecutar CD si RUN_CD=true o si rama=develop/master
+    condition: and(
+      succeeded(),
+      or(
+        eq(${{ parameters.RUN_CD }}, true),
+        eq(variables['Build.SourceBranchName'], 'develop'),
+        eq(variables['Build.SourceBranchName'], 'master')
+      )
+      )
+    jobs:
+      - job: cd_deploy
+        displayName: "Deploy con compose (logs + cleanup)"
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+          - script: |
+              if [ "$(Build.SourceBranchName)" = "master" ]; then DEPLOY_ENV=PRO; else DEPLOY_ENV=DEV; fi
+              IMAGE_VERSION=$(cat VERSION)
+              IMAGE_NAME="$(IMAGE_REPO):${IMAGE_VERSION}"
+              COMPOSE_PROJECT=$(echo "$DEPLOY_ENV" | tr '[:upper:]' '[:lower:]')
+              echo "Build app image"
+              docker build -t ${IMAGE_NAME} -f devops/Dockerfile .
+              echo "Despliegue"
+              docker compose -p ${COMPOSE_PROJECT} up -d
+              echo "Espera"
+              sleep 5
+              echo "Logs"
+              docker compose -p ${COMPOSE_PROJECT} logs $(COMPOSE_SERVICE)
+            displayName: "CD steps"
+          - script: |
+              if [ "$(Build.SourceBranchName)" = "master" ]; then DEPLOY_ENV=PRO; else DEPLOY_ENV=DEV; fi
+              IMAGE_VERSION=$(cat VERSION)
+              IMAGE_NAME="$(IMAGE_REPO):${IMAGE_VERSION}"
+              COMPOSE_PROJECT=$(echo "$DEPLOY_ENV" | tr '[:upper:]' '[:lower:]')
+              echo "Limpieza (aunque falle)"
+              docker compose -p ${COMPOSE_PROJECT} down --volumes || true
+              docker rmi ${IMAGE_NAME} || true
+            displayName: "Cleanup"
+            condition: always()
